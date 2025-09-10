@@ -8,12 +8,9 @@ CSV_FILE = "expenses.csv"
 # Load existing data or create a new DataFrame
 if os.path.exists(CSV_FILE):
     df = pd.read_csv(CSV_FILE)
-
-    # Ensure proper date conversion (handles YYYY-MM-DD safely)
     df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
 else:
     df = pd.DataFrame(columns=["desc", "amount", "category", "date"])
-
 
 st.set_page_config(page_title="💸 Expense Tracker", page_icon="📊", layout="centered")
 st.title("💸 Personal Expense Tracker")
@@ -59,6 +56,16 @@ if not filtered_df.empty:
 
 # --- Show Table ---
 st.dataframe(filtered_df, use_container_width=True)
+
+# --- Delete Option ---
+if not filtered_df.empty:
+    st.subheader("🗑️ Delete Expense")
+    row_to_delete = st.selectbox("Select an expense to delete", filtered_df.index)
+
+    if st.button("❌ Delete Selected Expense"):
+        df = df.drop(row_to_delete).reset_index(drop=True)
+        df.to_csv(CSV_FILE, index=False)
+        st.success("Expense deleted successfully! Refresh to see updates.")
 
 # --- Show Total ---
 if not filtered_df.empty:
